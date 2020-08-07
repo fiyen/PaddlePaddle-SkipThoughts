@@ -1,3 +1,7 @@
+# 直接从skip_thoughts.py调用相应模块即可
+<p><strong>注意，在进行训练时，需要先调用fit函数得到full_text，然后传入full_text进行训练。full_text就是整个文本的字符串。而在测试时，需要先调用fit_test_data来适应测试集的单词，然后调用vec_trans对向量进行线性转换，之后再进行测试。</strong></p>
+
+
 # PaddlePaddle-SkipThoughts
 Skip-Thought Vectors
 
