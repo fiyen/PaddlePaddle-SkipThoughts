@@ -16,16 +16,15 @@ Skip-Thought Vectors
 <p>模型的目标是最大化所有预测词被正确预测的概率，包括<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>s</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub></mrow>s_{i-1}</math></span><span aria-hidden="true" class="katex-html"><span class="base"><span style="height:0.638891em;vertical-align:-0.208331em;" class="strut"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span style="height:0.311664em;" class="vlist"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span style="height:2.7em;" class="pstrut"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span style="height:0.208331em;" class="vlist"><span></span></span></span></span></span></span></span></span></span>和<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>s</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow>s_{i+1}</math></span><span aria-hidden="true" class="katex-html"><span class="base"><span style="height:0.638891em;vertical-align:-0.208331em;" class="strut"></span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span style="height:0.311664em;" class="vlist"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span style="height:2.7em;" class="pstrut"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span style="height:0.208331em;" class="vlist"><span></span></span></span></span></span></span></span></span></span>中的词。公式如下：</p>
 <p><img alt="" src="https://ai-studio-static-online.cdn.bcebos.com/d517f6b9ef2b4b0db2fd46d97a9e3af5762eaab821cd4d3db65a5c28eaf68032"></p>
 
-GRU 以及Conditional GRU
-GRU
-标准的GRU结构我已在项目NLP经典之七：理解LSTM和GRU - Paddle实现中进行了详细的介绍，感兴趣的可以参考一下。下边我们重点介绍一下Conditional GRU该如何实现。
-
-Conditional GRU
-Conditional GRU与GRU的结构基本相同，所不同的是，Conditional GRU需要接收一个新的参数。虽然Paddle没有提供Conditional GRU，但是我们通过改写Paddle自带的basic_gru来轻松实现。改写部分如下：
-
-将GRUUnit中加入encode_hidden_size，其它参数与GRUUnit相同；
-
- def __init__(self,
+<div class="mc mc-container"><div class="mc-main-wrapper"><div class="mc-main"><div class="mc-preview" style="font-size: 13px;"><h2>GRU 以及Conditional GRU</h2>
+<h3>GRU</h3>
+<p>标准的GRU结构我已在项目<a target="_blank" href="https://aistudio.baidu.com/aistudio/projectdetail/592636">NLP经典之七：理解LSTM和GRU - Paddle实现</a>中进行了详细的介绍，感兴趣的可以参考一下。下边我们重点介绍一下Conditional GRU该如何实现。</p>
+<h3>Conditional GRU</h3>
+<p>Conditional GRU与GRU的结构基本相同，所不同的是，Conditional GRU需要接收一个新的参数。虽然Paddle没有提供Conditional GRU，但是我们通过改写Paddle自带的basic_gru来轻松实现。改写部分如下：</p>
+<ol>
+<li>
+<p>将GRUUnit中加入encode_hidden_size，其它参数与GRUUnit相同；</p>
+<pre><code> def __init__(self,
           name_scope,
           encode_hidden_size,
           hidden_size,
@@ -42,15 +41,11 @@ Conditional GRU与GRU的结构基本相同，所不同的是，Conditional GRU�
                                           activation=activation,
                                           dtype=dtype)
  self._encode_hiden_size = encode_hidden_size
-将C,Cr,CxC,C_r,C_xC,C 
-r
-​	
- ,C 
-x
-​	
- 加入到GRUUnit中的权重中；
-
- self._gate_weight = self.create_parameter(
+</code></pre>
+</li>
+<li>
+<p>将<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>C</mi><mo separator="true">,</mo><msub><mi>C</mi><mi>r</mi></msub><mo separator="true">,</mo><msub><mi>C</mi><mi>x</mi></msub></mrow>C,C_r,C_x</math></span><span aria-hidden="true" class="katex-html"><span class="base"><span style="height:0.8777699999999999em;vertical-align:-0.19444em;" class="strut"></span><span style="margin-right:0.07153em;" class="mord mathnormal">C</span><span class="mpunct">,</span><span style="margin-right:0.16666666666666666em;" class="mspace"></span><span class="mord"><span style="margin-right:0.07153em;" class="mord mathnormal">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span style="height:0.151392em;" class="vlist"><span style="top:-2.5500000000000003em;margin-left:-0.07153em;margin-right:0.05em;"><span style="height:2.7em;" class="pstrut"></span><span class="sizing reset-size6 size3 mtight"><span style="margin-right:0.02778em;" class="mord mathnormal mtight">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span style="height:0.15em;" class="vlist"><span></span></span></span></span></span></span><span class="mpunct">,</span><span style="margin-right:0.16666666666666666em;" class="mspace"></span><span class="mord"><span style="margin-right:0.07153em;" class="mord mathnormal">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span style="height:0.151392em;" class="vlist"><span style="top:-2.5500000000000003em;margin-left:-0.07153em;margin-right:0.05em;"><span style="height:2.7em;" class="pstrut"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span style="height:0.15em;" class="vlist"><span></span></span></span></span></span></span></span></span></span>加入到GRUUnit中的权重中；</p>
+<pre><code> self._gate_weight = self.create_parameter(
      attr=gate_param_attr,
      shape=[self._input_size + self._hiden_size + self._encode_hiden_size, 2 * self._hiden_size],
      dtype=self._dtype)
@@ -59,9 +54,11 @@ x
      attr=candidate_param_attr,
      shape=[self._input_size + self._hiden_size + self._encode_hiden_size, self._hiden_size],
      dtype=self._dtype)
-改写forward函数，将encode_hidden并到输入中，在使用中再拆分出来 pre_encode_hidden即为将pre_hidden以及encode_hidden合并后的变量；
-
- def forward(self, input, pre_encode_hidden):
+</code></pre>
+</li>
+<li>
+<p>改写forward函数，将encode_hidden并到输入中，在使用中再拆分出来 pre_encode_hidden即为将pre_hidden以及encode_hidden合并后的变量；</p>
+<pre><code> def forward(self, input, pre_encode_hidden):
  pre_hidden, encode_hidden = layers.split(pre_encode_hidden,
                                           num_or_sections=[self._hiden_size, self._encode_hiden_size],
                                           dim=1)
@@ -84,9 +81,11 @@ x
  new_hidden = u * pre_hidden + (1 - u) * c
 
  return new_hidden
-将basic_gru中加入参数encode_hidden，以及encode_hidden_size，以便传入Encoder层的隐含层信息；
-
- def conditional_gru(input,
+</code></pre>
+</li>
+<li>
+<p>将basic_gru中加入参数encode_hidden，以及encode_hidden_size，以便传入Encoder层的隐含层信息；</p>
+<pre><code> def conditional_gru(input,
              encode_hidden,
              init_hidden,
              encode_hidden_size,
@@ -102,9 +101,11 @@ x
              activation=None,
              dtype="float32",
              name="conditional_gru"):
-将gru所有隐含状态都输出，而不是只输出last_hidden。
-
- last_hidden_array = []
+</code></pre>
+</li>
+<li>
+<p>将gru所有隐含状态都输出，而不是只输出last_hidden。</p>
+<pre><code> last_hidden_array = []
  all_hidden_array = []  # 增加这个来得到所有隐含状态
  rnn_output = rnn_out[-1]
 
@@ -118,14 +119,14 @@ x
  all_hidden_array = layers.reshape(all_hidden_array, shape=[num_layers, input.shape[0], -1, hidden_size])
  last_hidden_output = layers.concat(last_hidden_array, axis=0)
  last_hidden_output = layers.reshape(last_hidden_output, shape=[num_layers, -1, hidden_size])
-我将改写后的代码放入了conditional_gru.py中以方便调用，感兴趣的人可以查看详情。
-
-拓展词向量
-在训练完成后，我们可能会遇到这样一个问题，那就是输入测试集后，由于已经训练的词向量中没有包含测试集中的某个词，造成查询失败而报错。本文作者给出了解决这个问题的一种方法，利用从更大的数据集得到的向量中进行线性映射，具体参考项目如何实现词向量扩充？试试词向量线性映射工具。其思路是先训练已有的词向量与更大数据集测到的词向量的线性映射关系，然后将训练未得到而大数据集中包含的词的向量线性映射给训练后的模型。
-
-这里需要注意的一点是，由于训练和测试的词向量的数目不一样，测试中需要重新设置Embedding层，并且不与训练的Embedding共享参数。那么训练得到的Embedding参数怎么传给测试的Embedding层？我们可以先把训练得到的所有向量提取出来，然后训练的Embedding层利用传入预训练参数的方式传进去。如下：
-
-def init_emb(self, for_test=False):
+</code></pre>
+</li>
+</ol>
+<p>我将改写后的代码放入了conditional_gru.py中以方便调用，感兴趣的人可以查看详情。</p>
+</div></div><div class="mc-right-aside"><div class="mc-collapse-icon-container"><i class="ai-icon mc-collapse-icon"><svg width="1em" height="1em" viewBox="0 0 32 32" fill="currentColor"><path d="M20.66 16L8.835 28.019a1.155 1.155 0 00.027 1.652 1.2 1.2 0 001.678-.026l12.627-12.832a1.155 1.155 0 000-1.626L10.539 2.355a1.2 1.2 0 00-1.678-.026 1.155 1.155 0 00-.027 1.652L20.661 16z"></path></svg></i></div><div class="mc-menu-icon-container ant-dropdown-trigger"><i class="ai-icon mc-menu-icon"><svg width="1em" height="1em" viewBox="0 0 32 32" fill="currentColor"><path d="M19.5 26.504a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0zm0-10.502a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0zm0-10.502a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0z"></path></svg></i></div></div></div></div><div class="mc mc-container mc-hover mc-focused"><div class="a-c-container a-c-container-bottom a-c-container-hide"></div><div class="mc-aside"><div class="mc-preview-icon-container"><i class="ai-icon mc-preview-icon mc-preview-icon-active"><svg width="1em" height="1em" viewBox="0 0 32 32" fill="currentColor"><path d="M2.073 16.343a.845.845 0 010-.686C4.52 10.133 9.932 6.5 16 6.5s11.479 3.633 13.927 9.157a.845.845 0 010 .686C27.48 21.867 22.068 25.5 16 25.5S4.521 21.867 2.073 16.343zM16 23.773c5.22 0 9.902-3.062 12.143-7.773C25.902 11.289 21.22 8.227 16 8.227c-5.22 0-9.902 3.062-12.143 7.773C6.098 20.711 10.78 23.773 16 23.773zm0-2.45c-3.043 0-5.51-2.393-5.51-5.344 0-2.951 2.467-5.344 5.51-5.344 3.043 0 5.51 2.393 5.51 5.344 0 2.951-2.467 5.344-5.51 5.344zm0-1.781c2.028 0 3.673-1.595 3.673-3.563 0-1.967-1.645-3.562-3.673-3.562s-3.673 1.595-3.673 3.562c0 1.968 1.645 3.563 3.673 3.563z"></path></svg></i></div></div><div class="mc-main-wrapper"><div class="mc-main"><div class="mc-preview" style="font-size: 13px;"><h2>拓展词向量</h2>
+<p>在训练完成后，我们可能会遇到这样一个问题，那就是输入测试集后，由于已经训练的词向量中没有包含测试集中的某个词，造成查询失败而报错。本文作者给出了解决这个问题的一种方法，利用从更大的数据集得到的向量中进行线性映射，具体参考项目<a target="_blank" href="https://aistudio.baidu.com/aistudio/projectdetail/631178">如何实现词向量扩充？试试词向量线性映射工具</a>。其思路是先训练已有的词向量与更大数据集测到的词向量的线性映射关系，然后将训练未得到而大数据集中包含的词的向量线性映射给训练后的模型。</p>
+<p>这里需要注意的一点是，由于训练和测试的词向量的数目不一样，测试中需要重新设置Embedding层，并且不与训练的Embedding共享参数。那么训练得到的Embedding参数怎么传给测试的Embedding层？我们可以先把训练得到的所有向量提取出来，然后训练的Embedding层利用传入预训练参数的方式传进去。如下：</p>
+<pre><code>def init_emb(self, for_test=False):
     """
     初始化Embedding层的参数
     :param for_test: 是否用于训练
@@ -142,7 +143,7 @@ def init_emb(self, for_test=False):
                                          dtype='float32')
     else:
         self.test_emb_pin += 1
-        if len(self.extra_emb) > 0:
+        if len(self.extra_emb) &gt; 0:
             extra_vecs = np.array(self.extra_emb)
             extend_vecs = np.concatenate((self.emb_numpy, extra_vecs), axis=1)
             extend_vecs = np.asarray(extend_vecs, dtype='float32')
@@ -151,4 +152,5 @@ def init_emb(self, for_test=False):
                                    trainable=False)
             self.test_embedding = fluid.Embedding(size=[extend_vecs.shape[0], self.word_emb_dim],
                                                   padding_idx=0, param_attr=init, dtype='float32')
-如果对预训练向量的传递方式感兴趣，可以参考项目Paddle实践之预训练向量工具在Paddle的应用。
+</code></pre>
+<p>如果对预训练向量的传递方式感兴趣，可以参考项目<a target="_blank" href="https://aistudio.baidu.com/aistudio/projectdetail/604002">Paddle实践之预训练向量工具在Paddle的应用</a>。</p></div></div></div></div>
